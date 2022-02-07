@@ -1,15 +1,17 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res } from "@nestjs/common"
 import { Request, Response } from "express";
-import { Content } from "./content.dto";
+import { Content } from "./content.model";
 import { ContentService } from "./content.service"
 
 @Controller('content')
 export class ContentController {
-    constructor(private readonly contentSerice: ContentService){}
+    constructor(private readonly contentSerice: ContentService) { }
 
     @Post()
-    createContent(@Body() content: Content, @Res({ passthrough: true }) response: Response) {
+    async createContent(@Body() content: Content, @Res({ passthrough: true }) response: Response) {
         console.log(content)
+        
+        await this.contentSerice.createContent()
         // save content
         // return response.status((HttpStatus.CREATED)).send(content);
         response.status((HttpStatus.CREATED))
@@ -17,9 +19,10 @@ export class ContentController {
     }
 
     @Get()
-    findAll(@Res() response: Response) {
+    async findAll(@Res() response: Response) {
         // fetch all
-        return response.status(200).send("response body")
+        const data = await this.contentSerice.findAll()
+        return response.status(200).send(data)
     }
 
     @Get(":id")
@@ -36,7 +39,7 @@ export class ContentController {
     }
 
     @Delete(':id')
-    delete(@Param('id') id:string, @Res() response:Response) {
+    delete(@Param('id') id: string, @Res() response: Response) {
         // delete operation
         return response.status(200).send("response body")
     }
