@@ -7,15 +7,15 @@ import { Content } from "./content.model";
 export class ContentService {
     constructor(@InjectModel(Content) private contentModel: typeof Content, private sequelize: Sequelize) { }
 
-    async createContent() {
+    async createContent(content: Content) {
         try {
-            // this.contentModel.create({ name: 'content 1', description: 'content description 1', url: 'url 1' })
-            await this.sequelize.transaction(async t => {
+            const resp = await this.sequelize.transaction(async t => {
                 const transactionHost = { transaction: t }
-                await this.contentModel.create({ name: 'content 1', description: 'content description 1', url: 'url 1' }, transactionHost);
+                return await this.contentModel.create({ ...content }, transactionHost);
             })
+            return resp;
         } catch (err) {
-            console.log(err)
+            return err
         }
     }
 
@@ -23,22 +23,16 @@ export class ContentService {
         return this.contentModel.findAll();
     }
 
-    findOne(id: string): Promise<Content> {
-        return this.contentModel.findOne({
-            where: {
-                id,
-            }
-        })
+    async findOne(id: string): Promise<Content> {
+        return this.contentModel.findOne({where: { id, } })
     }
 
-    async remove(id: string): Promise<void> {
+    async updateOne(id: string, content: Content) {
+        return this.contentModel.update(content, { where: { id: id } });
+    }
 
+    async remove(id: string){
         const content = await this.findOne(id);
-        await content.destroy();
-    }
-
-
-    getAllContent(): string {
-        return 'hello content1'
+        return await content.destroy();
     }
 }

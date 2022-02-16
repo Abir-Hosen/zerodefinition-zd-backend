@@ -5,43 +5,42 @@ import { ContentService } from "./content.service"
 
 @Controller('content')
 export class ContentController {
-    constructor(private readonly contentSerice: ContentService) { }
+    constructor(private readonly contentService: ContentService) { }
 
     @Post()
     async createContent(@Body() content: Content, @Res({ passthrough: true }) response: Response) {
-        console.log(content)
-        
-        await this.contentSerice.createContent()
-        // save content
-        // return response.status((HttpStatus.CREATED)).send(content);
+        const resp = await this.contentService.createContent(content)
         response.status((HttpStatus.CREATED))
-        return []
+        return resp;
     }
 
     @Get()
     async findAll(@Res() response: Response) {
-        // fetch all
-        const data = await this.contentSerice.findAll()
-        return response.status(200).send(data)
+        const resp = await this.contentService.findAll()
+        return response.status(200).send(resp)
     }
 
     @Get(":id")
-    findOne(@Param("id") id: string, @Res() response: Response) {
-        // fetch content by id
-        console.log(id)
-        return response.status(200).send("find one resp body")
+    async findOne(@Param("id") id: string, @Res() response: Response) {
+        const resp = await this.contentService.findOne(id)
+        return response.status(200).send(resp)
     }
 
     @Put(':id')
-    update(@Param("id") id: string, @Body() content: Content, @Res() response: Response) {
-        //update operation
-        return response.status(200).send("response body")
+    async update(@Param("id") id: string, @Body() content: Content, @Res() response: Response) {
+        const resp = await this.contentService.updateOne(id, content)
+        return response.status(200).send(resp)
     }
 
     @Delete(':id')
-    delete(@Param('id') id: string, @Res() response: Response) {
-        // delete operation
-        return response.status(200).send("response body")
+    async delete(@Param('id') id: string, @Res() response: Response) {
+        try{
+            const resp = await this.contentService.remove(id)
+            return response.status(200).send(resp)
+        }
+        catch(err){
+            return response.status(400).send(err)
+        }
     }
 
 }
